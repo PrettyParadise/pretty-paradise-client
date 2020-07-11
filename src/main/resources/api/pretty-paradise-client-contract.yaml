@@ -1,0 +1,82 @@
+openapi: 3.0.0
+info:
+  version: 1.0.0
+  title: Pretty Paradise Client API
+  description: ''
+# Added by API Auto Mocking Plugin
+servers:
+  - description: SwaggerHub API Auto Mocking
+    url: https://virtserver.swaggerhub.com/Quintin/pretty-paradise-client/1.0.0
+
+tags:
+  - name: client
+    description: CLient related endpoints
+
+paths:
+  /products:
+    get:
+      tags:
+        - client
+      summary: Retrieves all products.
+      operationId: getAllProducts
+      responses:
+        "200":
+          description: All products retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Products"
+        "500":
+          description: error occurred - see status code and problem object for more information.
+          content:
+            application/problem+json:
+              schema:
+                $ref: 'https://opensource.zalando.com/problem/schema.yaml#/Problem'
+  /products/request:
+    post:
+      tags:
+        - client
+      summary: Email request for products.
+      operationId: requestProducts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProductsRequest"
+      responses:
+        "200":
+          description: Request processed, email sent.
+        "500":
+          description: error occurred - see status code and problem object for more information.
+          content:
+            application/problem+json:
+              schema:
+                $ref: 'https://opensource.zalando.com/problem/schema.yaml#/Problem'
+
+components:
+  schemas:
+    Product:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+          example: 1
+        name:
+          type: string
+          example: "grey and glitter"
+        price:
+          type: number
+          format: double
+          example: '30.00'
+        image:
+          type: string
+          format: binary
+    Products:
+      type: array
+      items:
+        $ref: "#/components/schemas/Product"
+    ProductsRequest:
+      type: array
+      items:
+        $ref: "#/components/schemas/Product"
