@@ -60,7 +60,7 @@ components:
       properties:
         id:
           type: integer
-          format: int32
+          format: int64
           example: 1
         name:
           type: string
@@ -69,9 +69,20 @@ components:
           type: number
           format: double
           example: '30.00'
-        image:
+        productImage:
+          $ref: "#/components/schemas/ProductImage"
+    ProductImage:
+      type: object
+      required:
+        - fileName
+      properties:
+        id:
+          type: integer
+          format: int64
+        fileName:
           type: string
           format: binary
+
     Products:
       type: array
       items:
