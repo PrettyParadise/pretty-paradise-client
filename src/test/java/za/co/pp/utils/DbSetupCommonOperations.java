@@ -5,12 +5,13 @@ import com.ninja_squad.dbsetup.operation.Operation;
 import static com.ninja_squad.dbsetup.Operations.insertInto;
 import static com.ninja_squad.dbsetup.Operations.sequenceOf;
 import static com.ninja_squad.dbsetup.Operations.sql;
+import static com.ninja_squad.dbsetup.Operations.truncate;
 import static za.co.pp.utils.ProductUtils.getTestProductImageByteArray;
 
 public class DbSetupCommonOperations {
 
-    public static Operation CREATE_SCHEMA = sql("CREATE SCHEMA pretty_paradise");
-    public static Operation CREATE_TABLE = sql("CREATE TABLE pretty_paradise.product(" +
+    public static final Operation CREATE_SCHEMA = sql("CREATE SCHEMA pretty_paradise");
+    public static final Operation CREATE_TABLE = sql("CREATE TABLE pretty_paradise.product(" +
             "product_id BIGINT AUTO_INCREMENT PRIMARY KEY," +
             "name VARCHAR(50)," +
             "price DECIMAL UNSIGNED," +
@@ -32,4 +33,7 @@ public class DbSetupCommonOperations {
                         .build()
                 );
     }
+
+    public static  final Operation DROP_SCHEMA_IF_EXISTS = sql("DROP SCHEMA IF EXISTS pretty_paradise CASCADE");
+
 }
