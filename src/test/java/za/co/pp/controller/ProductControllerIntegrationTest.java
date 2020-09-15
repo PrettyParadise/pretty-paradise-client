@@ -2,6 +2,8 @@ package za.co.pp.controller;
 
 import javax.sql.DataSource;
 
+import java.util.Base64;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -13,6 +15,7 @@ import za.co.pp.data.dto.Product;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static za.co.pp.utils.ProductUtils.createDatabaseAndPopulateProductsTable;
+import static za.co.pp.utils.ProductUtils.getTestProductImageByteArray;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class ProductControllerIntegrationTest {
@@ -40,22 +43,25 @@ class ProductControllerIntegrationTest {
         assertValuesOfEachProduct(products.getBody());
     }
 
-    @Test
-    void canGetProblemResponseWithInternalServerError(){
-
-    }
-
-    private void assertValuesOfEachProduct(Product[] products) {
+    private void assertValuesOfEachProduct(Product[] products) throws Exception{
+        String encodedTestImage = getTestProductEncodedImage();
         assertThat(products[0].getId()).isEqualTo(1L);
         assertThat(products[0].getName()).isEqualTo("pink and pretty");
         assertThat(products[0].getPrice()).isEqualTo(20.00);
+        assertThat(products[0].getEncodedImage()).isEqualTo(encodedTestImage);
 
         assertThat(products[1].getId()).isEqualTo(2L);
         assertThat(products[1].getName()).isEqualTo("purple and popping");
         assertThat(products[1].getPrice()).isEqualTo(20.00);
+        assertThat(products[1].getEncodedImage()).isEqualTo(encodedTestImage);
 
         assertThat(products[2].getId()).isEqualTo(3L);
         assertThat(products[2].getName()).isEqualTo("gray and glitter");
         assertThat(products[2].getPrice()).isEqualTo(20.00);
+        assertThat(products[2].getEncodedImage()).isEqualTo(encodedTestImage);
+    }
+
+    private String getTestProductEncodedImage() throws Exception {
+        return Base64.getEncoder().encodeToString(getTestProductImageByteArray());
     }
 }
