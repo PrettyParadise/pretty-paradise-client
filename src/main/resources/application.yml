@@ -1,3 +1,11 @@
+server:
+  port: 8002
 spring:
   application:
     name: pretty-paradise-client
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/pretty_paradise
+    username: 'root'
+    password: 'pp_root'
+    driver-class-name: com.mysql.cj.jdbc.Driver
