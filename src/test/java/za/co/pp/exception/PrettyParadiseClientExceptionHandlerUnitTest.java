@@ -11,7 +11,7 @@ import org.springframework.web.client.HttpServerErrorException;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-public class PrettyParadiseClientExceptionHandlerUnitTest {
+class PrettyParadiseClientExceptionHandlerUnitTest {
     @Autowired
     private PrettyParadiseClientExceptionHandler prettyParadiseClientExceptionHandler;
 
@@ -20,14 +20,22 @@ public class PrettyParadiseClientExceptionHandlerUnitTest {
         final ResponseEntity<Problem> responseEntity =
                 prettyParadiseClientExceptionHandler.handleHttpServerErrorException(new HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR));
 
-        assertZalandoProblemResponse(responseEntity);
+        assertZalandoProblemResponse(responseEntity, HttpStatus.INTERNAL_SERVER_ERROR, responseEntity.getStatusCode().getReasonPhrase());
     }
 
-    private void assertZalandoProblemResponse(final ResponseEntity<Problem> responseEntity) {
+    @Test
+    void canReturnProblemResponseWhenPrettyParadiseClientExceptionIsCaught(){
+        final ResponseEntity<Problem> responseEntity =
+                prettyParadiseClientExceptionHandler.handlePrettyParadiseClientException(new PrettyParadiseClientException("Error occurred.", HttpStatus.BAD_REQUEST));
+
+        assertZalandoProblemResponse(responseEntity, HttpStatus.BAD_REQUEST, "Error occurred.");
+    }
+
+    private void assertZalandoProblemResponse(final ResponseEntity<Problem> responseEntity, HttpStatus httpStatus, String detail) {
         assertThat(responseEntity.getHeaders().getContentType()).isEqualTo(MediaType.APPLICATION_PROBLEM_JSON);
-        assertThat(responseEntity.getBody().getStatus()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
-        assertThat(responseEntity.getBody().getTitle()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR.name());
-        assertThat(responseEntity.getBody().getDetail()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase());
+        assertThat(responseEntity.getBody().getStatus()).isEqualTo(httpStatus);
+        assertThat(responseEntity.getBody().getTitle()).isEqualTo(httpStatus.name());
+        assertThat(responseEntity.getBody().getDetail()).isEqualTo(detail);
     }
 
 }
