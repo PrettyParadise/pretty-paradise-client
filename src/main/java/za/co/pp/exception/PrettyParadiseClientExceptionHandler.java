@@ -19,6 +19,13 @@ public class PrettyParadiseClientExceptionHandler {
         return new ResponseEntity(problem, getZalandoProblemHttpHeaders(), e.getStatusCode());
     }
 
+    @ExceptionHandler(PrettyParadiseClientException.class)
+    public ResponseEntity<Problem> handlePrettyParadiseClientException(PrettyParadiseClientException e){
+        log.error(e.getMessage(), e);
+        Problem problem = new Problem(e.getHttpStatus(), e.getHttpStatus().name(), e.getMessage());
+        return new ResponseEntity<>(problem, getZalandoProblemHttpHeaders(), e.getHttpStatus());
+    }
+
     private HttpHeaders getZalandoProblemHttpHeaders() {
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setContentType(MediaType.APPLICATION_PROBLEM_JSON);
