@@ -3,8 +3,6 @@ server:
 spring:
   application:
     name: pretty-paradise-client
-#  session:
-#    store-type: jdbc
 
   datasource:
     url: jdbc:mysql://localhost:3306/pretty_paradise
