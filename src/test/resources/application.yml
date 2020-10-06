@@ -7,3 +7,13 @@ spring:
       ddl-auto: none
   session:
     store-type: jdbc
+  mail:
+    host: localhost
+    username: username
+    password: secret
+    port: 2525
+    properties:
+      smtp:
+        auth: true
+        starttls:
+          enable: true

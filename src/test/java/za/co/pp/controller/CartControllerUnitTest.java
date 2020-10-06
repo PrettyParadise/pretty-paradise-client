@@ -8,13 +8,20 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import za.co.pp.PrettyParadiseClientApplication;
+import za.co.pp.controller.validation.ProductIdValidator;
+import za.co.pp.controller.validation.ProductValidator;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.doNothing;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest(classes = {PrettyParadiseClientApplication.class})
@@ -24,11 +31,16 @@ class CartControllerUnitTest {
     @Autowired
     private MockMvc mockMvc;
 
+    @MockBean
+    private ProductIdValidator productValidator;
+
     @Test
     @DisplayName("Given a request to store product with productId 1 in cart for the first time and another there after, " +
             "when /cart/1 endpoint hit twice successively, " +
             "then a cart for the session is created with size 1 and 2 after another call with the same session")
     void canUseSaveProductIdsInSameCart() throws Exception {
+        doNothing().when(productValidator).validateProductId(anyLong());
+
         MvcResult mvcResultFirstRequest = makeRequestToAddItemToCartAndAssertOkResponseWithSession(null);
         assertNumberOfItemsAddedToCart(mvcResultFirstRequest, 1);
 
@@ -42,6 +54,8 @@ class CartControllerUnitTest {
             "when /cart/1 and cart/1 endpoint is hit independently, " +
             "then a session exists independently for the 2 requests and a cart attribute exists for both of size 1")
     void canSaveProductIdsForIndependentSessions() throws Exception {
+        doNothing().when(productValidator).validateProductId(anyLong());
+
         MvcResult mvcResultFirstRequest = makeRequestToAddItemToCartAndAssertOkResponseWithSession(null);
         assertNumberOfItemsAddedToCart(mvcResultFirstRequest, 1);
 
@@ -50,6 +64,23 @@ class CartControllerUnitTest {
 
     }
 
+    @Test
+    @DisplayName("Given 3 items have been added to the cart, " +
+            "when /cart get endpoint hit, " +
+            "then 3 items are returned")
+    void canGetCartItems() throws Exception{
+        MvcResult mvcResultFirstRequest = makeRequestToAddItemToCartAndAssertOkResponseWithSession(null); // make first request to add a cart item with ID 1
+        HttpSession sessionFirstRequest = mvcResultFirstRequest.getRequest().getSession(); // get session for the request
+
+        makeRequestToAddItemToCartAndAssertOkResponseWithSession(sessionFirstRequest); // add another item with the session created for previous request
+        makeRequestToAddItemToCartAndAssertOkResponseWithSession(sessionFirstRequest); // make a third request to add an item to current session cart
+
+        MvcResult mvcResult = this.mockMvc.perform(get("/cart").session((MockHttpSession) sessionFirstRequest))
+                .andExpect(status().isOk())
+                .andReturn();
+    
+        assertThat(mvcResult.getResponse().getContentAsString()).isEqualToIgnoringCase("[1,1,1]");
+    }
     private void assertNumberOfItemsAddedToCart(final MvcResult mvcResultFirstRequest, int numberOfItems) {
         List<Long> cartItemsFirstRequest = getSessionCartAttribute(mvcResultFirstRequest);
         assertThat(cartItemsFirstRequest).isNotNull().hasSize(numberOfItems);

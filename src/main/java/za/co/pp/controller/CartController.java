@@ -16,4 +16,14 @@ public interface CartController {
         return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
     }
 
+    @RequestMapping(value = "cart/{emailAddress}", method = RequestMethod.PUT)
+    default ResponseEntity<Void> requestProducts(@ModelAttribute("cart") List<Long> cart, @PathVariable String emailAddress){
+        return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
+    }
+
+    @RequestMapping(value = "/cart", method = RequestMethod.GET)
+    default ResponseEntity<List<Long>> getCartItems(@ModelAttribute("cart") List<Long> cart){
+        return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
+    }
+
 }
