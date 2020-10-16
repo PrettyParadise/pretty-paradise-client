@@ -9,4 +9,6 @@ public interface ProductService {
 
     List<ProductDomainObject> getAllProducts();
 
+    void sendEmailToRequestProductsInCart(List<Long> cartProductIdItems, String emailAddress);
+
 }
