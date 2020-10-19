@@ -7,8 +7,9 @@ import za.co.pp.data.dto.Product;
 
 public interface ProductService {
 
-    List<ProductDomainObject> getAllProducts();
+    List<ProductDomainObject> getAllProductDomainObjects();
 
     void sendEmailToRequestProductsInCart(List<Long> cartProductIdItems, String emailAddress);
 
+    ProductDomainObject getProductDomainObject(long productId);
 }

@@ -3,10 +3,7 @@ package za.co.pp.controller;
 import javax.sql.DataSource;
 import java.util.Base64;
 
-import com.ninja_squad.dbsetup.DbSetup;
-import com.ninja_squad.dbsetup.destination.DataSourceDestination;
-import com.ninja_squad.dbsetup.operation.Operation;
-import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -17,12 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 import za.co.pp.data.dto.Product;
 
-import static com.ninja_squad.dbsetup.Operations.sequenceOf;
 import static org.assertj.core.api.Assertions.assertThat;
-import static za.co.pp.utils.DbSetupCommonOperations.CREATE_SCHEMA;
-import static za.co.pp.utils.DbSetupCommonOperations.DROP_SCHEMA_IF_EXISTS;
-import static za.co.pp.utils.DbSetupCommonOperations.CREATE_SPRING_SESSION_ATTRIBUTES_TABLE;
-import static za.co.pp.utils.DbSetupCommonOperations.CREATE_SPRING_SESSION_TABLE;
 import static za.co.pp.utils.ProductUtils.createDatabaseAndPopulateProductsTable;
 import static za.co.pp.utils.ProductUtils.getTestProductImageByteArray;
 
@@ -45,9 +37,13 @@ class ProductControllerIntegrationTest {
         this.restTemplate = restTemplate;
     }
 
+    @BeforeEach
+    void setup() throws Exception {
+        createDatabaseAndPopulateProductsTable(dataSource);
+    }
+
     @Test
     void canGetAllProducts() throws Exception {
-        createDatabaseAndPopulateProductsTable(dataSource);
 
         ResponseEntity<Product[]> products = this.restTemplate.getForEntity("http://localhost:" + port + "/products", Product[].class);
 
@@ -56,6 +52,18 @@ class ProductControllerIntegrationTest {
         assertValuesOfEachProduct(products.getBody());
     }
 
+    @Test
+    void canGetAProduct() throws Exception {
+        ResponseEntity<Product> productResponseEntity = this.restTemplate.getForEntity("http://localhost:" + port + "/products/{productId}", Product.class, 1);
+
+        assertThat(productResponseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+        Product product = productResponseEntity.getBody();
+        assertThat(product).isNotNull();
+        assertThat(product.getId()).isEqualTo(1);
+        assertThat(product.getName()).isEqualToIgnoringCase("pink and pretty");
+        assertThat(product.getPrice()).isEqualTo(20.00);
+        assertThat(product.getEncodedImage()).isEqualTo(getTestProductEncodedImage());
+    }
 
     private void assertValuesOfEachProduct(Product[] products) throws Exception {
         String encodedTestImage = getTestProductEncodedImage();

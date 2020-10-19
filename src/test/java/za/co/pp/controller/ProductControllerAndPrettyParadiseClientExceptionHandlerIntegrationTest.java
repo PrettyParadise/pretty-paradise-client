@@ -1,8 +1,6 @@
 package za.co.pp.controller;
 
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -13,13 +11,11 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.HttpServerErrorException;
 import za.co.pp.controller.validation.ProductIdValidator;
-import za.co.pp.data.repository.ProductRepository;
 import za.co.pp.exception.PrettyParadiseClientException;
 import za.co.pp.exception.Problem;
 import za.co.pp.service.ProductService;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
@@ -41,7 +37,7 @@ class ProductControllerAndPrettyParadiseClientExceptionHandlerIntegrationTest {
 
     @Test
     void canCatchHttpServerErrorExceptionAndReturnZalandoProblemResponse(){
-        when(productService.getAllProducts()).thenThrow(new HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR));
+        when(productService.getAllProductDomainObjects()).thenThrow(new HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR));
 
         ResponseEntity<Problem> responseEntity = restTemplate.getForEntity("http://localhost:" + port + "/products", Problem.class);
 
