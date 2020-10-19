@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
@@ -12,9 +13,11 @@ import za.co.pp.data.domain.ProductDomainObject;
 import za.co.pp.data.entity.ProductEntity;
 import za.co.pp.data.mapper.ProductMapper;
 import za.co.pp.data.repository.ProductRepository;
+import za.co.pp.exception.PrettyParadiseClientException;
 
 @Service
-public class ProductServiceImpl implements ProductService{
+public class ProductServiceImpl implements ProductService {
+
     private ProductRepository productRepository;
     private ProductMapper productMapper;
     private final JavaMailSender emailSender;
@@ -29,10 +32,12 @@ public class ProductServiceImpl implements ProductService{
     }
 
     @Override
-    public List<ProductDomainObject> getAllProducts() {
+    public List<ProductDomainObject> getAllProductDomainObjects() {
         List<ProductEntity> productEntities = productRepository.findAll();
         List<ProductDomainObject> productDomainObjects = productEntities.stream().map(
-                productEntity -> { return productMapper.entityToDomain(productEntity);}
+                productEntity -> {
+                    return productMapper.entityToDomain(productEntity);
+                }
         ).collect(Collectors.toList());
         return productDomainObjects;
     }
@@ -48,10 +53,19 @@ public class ProductServiceImpl implements ProductService{
 
     }
 
+    @Override
+    public ProductDomainObject getProductDomainObject(final long productId) {
+        ProductEntity productEntity = this.productRepository.findById(productId).orElseThrow(
+                () -> new PrettyParadiseClientException(
+                        String.format("ProductEntity with productId %s does not exist", productId),
+                        HttpStatus.NOT_FOUND));
+        return this.productMapper.entityToDomain(productEntity);
+    }
+
     private String prepareEmailBody(List<Long> cartProductIdItems, String emailAddress) {
         List<String> productDescriptions = createProductDescriptionsList(cartProductIdItems);
         String message = "";
-        for(String productDescription: productDescriptions){
+        for (String productDescription : productDescriptions) {
             message += productDescription + "\n";
         }
         message += "\n" + emailAddress + " placed the order.";
@@ -60,7 +74,7 @@ public class ProductServiceImpl implements ProductService{
 
     private List<String> createProductDescriptionsList(final List<Long> cartProductIdItems) {
         List<String> productIdNameAndPrices = new ArrayList<>();
-        for (Long productId: cartProductIdItems) {
+        for (Long productId : cartProductIdItems) {
             ProductEntity product = this.productRepository.findById(productId).get();
             String message = product.getId() + " - " + product.getName() + " - R" + product.getPrice();
             productIdNameAndPrices.add(message);
